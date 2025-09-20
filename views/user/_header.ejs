@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library System</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        /* Navbar */
+        nav {
+            background-color: #ff5722; /* สีแดงโทนวิศวกรรม */
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        nav h1 {
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav li {
+            margin-left: 15px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            transition: 0.3s;
+            border-radius: 6px;
+        }
+
+        nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Main Content */
+        main {
+            padding: 20px;
+            font-size: 18px;
+            color: #333;
+            max-width: 1200px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            nav ul {
+                margin-top: 10px;
+            }
+
+            nav li {
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <h1><i class='bx bx-library'></i> ระบบห้องสมุด</h1>
+            <ul>
+                <li><a href="/books"><i class='bx bx-book'></i> หนังสือ</a></li>
+                <li><a href="/category"><i class='bx bx-category'></i> หมวดหมู่</a></li>
+
+                
+                <% if (session && session.user) { %>
+                    <li><a href="/user/list/<%= session.user.id %>"><i class='bx bx-book-reader'></i> ประวัติการยืมหนังสือ</a></li>
+                    <li><a href="/user/account/<%= session.user.id %>"><i class='bx bx-user-circle' ></i> บัญชีผู้ใช้</a></li>
+                    <li><a href="/logout"><i class='bx bx-log-out'></i> ออกจากระบบ</a></li>
+                <% } else { %>
+                    <li><a href="/login"><i class='bx bx-log-in'></i> เข้าสู่ระบบ</a></li>
+                <% } %>                
+            </ul>
+        </nav>
+    </header>
+    
+    
+    
+    
+

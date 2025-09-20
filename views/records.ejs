@@ -1,0 +1,420 @@
+<%- include("../views/_header1"); -%>
+<head>
+  <meta charset="UTF-8">
+  <title>ยืมหนังสือ</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Arial', sans-serif;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 30px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .btn-success, .btn-warning, .btn-danger {
+      margin-right: 10px;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    table th, table td {
+      padding: 15px;
+      text-align: center;
+    }
+    table th {
+      background-color: #ea9292;
+      color: white;
+    }
+    table td {
+      background-color: white;
+    }
+    table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    footer {
+      background-color: #79c0d9;
+      padding: 10px;
+      text-align: center;
+      color: white;
+      margin-top: 30px;
+    }
+    #quantityDisplay {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #555;
+    }
+
+    /* Custom Select2 */
+    .select2-container {
+  z-index: 1055 !important; /* ให้สูงกว่า SweetAlert2 หรือ Modal ปกติ */
+}
+    .select2-container .select2-search--dropdown .select2-search__field {
+      border: 2px solid #6c757d;
+      border-radius: 30px;
+      padding: 10px 20px 10px 35px;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/622/622669.png');
+      background-repeat: no-repeat;
+      background-position: 10px center;
+      background-size: 18px 18px;
+      font-size: 16px;
+      color: #333;
+      transition: border-color 0.3s ease;
+    }
+    .select2-container .select2-search--dropdown .select2-search__field:focus {
+      border-color: #bf360c;
+      outline: none;
+      box-shadow: 0 0 5px rgba(218, 38, 47, 0.5);
+    }
+    .select2-dropdown {
+      animation: fadeInDropdown 0.3s ease;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    @keyframes fadeInDropdown {
+      0% {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .select2-results__option--highlighted {
+      background-color: #9e9e9e !important;
+      color: #212529;
+      font-weight: bold;
+    }
+    @media (max-width: 768px) {
+      .select2-container .select2-selection--single {
+        font-size: 18px;
+      }
+      .select2-container .select2-search--dropdown .select2-search__field {
+        font-size: 18px;
+      }
+    }
+    #bookCoverImage {
+  width: 150px;
+  height: 200px;
+  object-fit: cover; /* ครอบภาพให้พอดีโดยไม่ผิดสัดส่วน */
+  border-radius: 10px; /* เพิ่มมุมโค้งนิดหน่อยให้สวย */
+  display: none;
+}
+
+    
+    .form-control:focus {
+            box-shadow: 0 0 10px #bf360c;
+            border-color: #bf360c;
+        }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>ฟอร์มบันทึกการยืมหนังสือ</h1>
+
+    <form id="borrowForm" action="/records/<%= books[0]?.id || '' %>" method="POST">
+      <div class="form-group">
+        <label for="user_id">ชื่อผู้ยืม:</label>
+        <select name="user_id" id="user_id" class="form-control" required>
+          <option value="">-- กรุณาเลือกผู้ใช้ --</option>
+          <% users.forEach(user => { %>
+            <option value="<%= user.id %>"><%= user.username %> (<%= user.phone %>)</option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="book_id">ชื่อหนังสือ:</label>
+        <select name="book_id" id="book_id" class="form-control" required>
+          <option value="">-- กรุณาเลือกหนังสือ --</option>
+          <% books.forEach(book => { %>
+            <option value="<%= book.id %>" data-quantity="<%= book.quantity %>" data-cover="/images/<%= book.image %>">
+              <%= book.title %>
+            </option>            
+          <% }); %>
+        </select>
+        <div id="quantityDisplay" class="mt-2"></div>
+        <div id="bookCover" class="mt-2">
+          <!-- ภาพปกจะถูกแสดงผ่าน JavaScript -->
+          <img id="bookCoverImage" src="" alt="Book Cover" style="max-width: 200px; display: none;" />
+        </div>
+      </div>
+      
+
+      <div class="form-group">
+        <label for="borrow_date">วันที่ยืม:</label>
+        <input type="date" name="borrow_date" id="borrow_date" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="return_date">วันที่คืน:</label>
+        <input type="date" name="return_date" id="return_date" class="form-control" required>
+      </div>
+
+      <div class="form-group">
+        <label for="status">สถานะ:</label>
+        <input type="hidden" name="status" id="status" value="กำลังยืม">
+        <input type="text" class="form-control" value="กำลังยืม" disabled>
+      </div>
+
+      <button type="submit" id="submitButton" class="btn btn-success">บันทึกข้อมูล</button>
+    </form>
+  </div>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Select2 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <script>
+    $(document).ready(function() {
+
+      function matchCustom(params, data) {
+        if ($.trim(params.term) === '') {
+          return data;
+        }
+        if (typeof data.text === 'undefined') {
+          return null;
+        }
+        if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) {
+          return $.extend({}, data, true);
+        }
+        return null;
+      }
+
+      $('#user_id').select2({
+  placeholder: "-- กรุณาเลือกผู้ยืม --",
+  allowClear: true,
+  width: '100%',
+  dropdownParent: $('#borrowForm'),  // <<< ตรงนี้มีนะ
+  matcher: matchCustom
+});
+
+$('#book_id').select2({
+  placeholder: "-- กรุณาเลือกหนังสือ --",
+  allowClear: true,
+  width: '100%',
+  dropdownParent: $('#borrowForm'),  // <<< ตรงนี้ด้วย
+  matcher: matchCustom
+});
+
+
+$('#book_id').on('change', function() {
+  const selectedOption = $(this).find(':selected');
+  const quantity = selectedOption.data('quantity');
+  const coverImageUrl = selectedOption.data('cover');
+
+  // ตรวจสอบว่า coverImageUrl ถูกต้องหรือไม่
+  console.log(coverImageUrl);
+
+  if (quantity !== undefined) {
+    $('#quantityDisplay').html(`<strong>คงเหลือ:</strong> ${quantity} เล่ม`);
+    if (quantity == 0) {
+      $('#submitButton').prop('disabled', true)
+        .removeClass('btn-success')
+        .addClass('btn-secondary');
+    } else {
+      $('#submitButton').prop('disabled', false)
+        .removeClass('btn-secondary')
+        .addClass('btn-success');
+    }
+  } else {
+    $('#quantityDisplay').empty();
+    $('#submitButton').prop('disabled', true);
+  }
+
+  // แสดงภาพปกหนังสือถ้ามี
+  if (coverImageUrl) {
+    $('#bookCoverImage').attr('src', coverImageUrl).show();
+  } else {
+    $('#bookCoverImage').hide();
+  }
+});
+
+
+
+function setBorrowAndReturnDate() {
+  const today = new Date();
+  
+  // ปรับเวลาให้เป็นเขตเวลา UTC+7
+  const bangkokTime = new Date(today.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' })); // ใช้ timeZone เพื่อให้ตรงกับกรุงเทพฯ
+  
+  // แปลงวันที่ปัจจุบันให้เป็นรูปแบบ YYYY-MM-DD สำหรับวันที่ยืม
+  const todayStr = bangkokTime.toLocaleDateString('en-CA');  // ใช้ 'en-CA' เพื่อให้ได้รูปแบบ YYYY-MM-DD
+  $('#borrow_date').val(todayStr);  // ตั้งค่าวันที่ยืมให้กับฟิลด์
+
+  // คำนวณวันที่คืน (7 วันหลังจากวันที่ยืม)
+  const returnDate = new Date(bangkokTime);
+  returnDate.setDate(bangkokTime.getDate() + 7);  // เพิ่ม 7 วัน
+  const returnDateStr = returnDate.toLocaleDateString('en-CA');  // ใช้ 'en-CA' เพื่อให้ได้รูปแบบ YYYY-MM-DD
+  $('#return_date').val(returnDateStr);  // ตั้งค่าวันที่คืนให้กับฟิลด์
+}
+
+// function showCurrentTime() {
+//   const today = new Date();
+  
+//   // ปรับเวลาให้เป็นเขตเวลา UTC+7
+//   const bangkokTime = new Date(today.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' })); // ใช้ timeZone เพื่อให้ตรงกับกรุงเทพฯ
+  
+//   // แสดงเวลาและวันที่ในคอนโซล
+//   const timeString = bangkokTime.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
+//   console.log("เวลาปัจจุบันในกรุงเทพฯ: " + timeString);
+//   alert("เวลาปัจจุบันในกรุงเทพฯ: " + timeString);
+// }
+
+// showCurrentTime();  // เรียกฟังก์ชันเพื่อแสดงเวลา
+
+setBorrowAndReturnDate();
+
+      $('#borrow_date').on('change', function() {
+        const borrowDate = new Date($(this).val());
+
+        if (!isNaN(borrowDate)) {
+          const returnDate = new Date(borrowDate);
+          returnDate.setDate(borrowDate.getDate() + 7);
+          const returnDateStr = returnDate.toISOString().split('T')[0];
+          $('#return_date').val(returnDateStr);
+        }
+      });
+
+      setInterval(() => {
+        const currentDate = new Date().toISOString().split('T')[0];
+        if ($('#borrow_date').val() !== currentDate) {
+          setBorrowAndReturnDate();
+        }
+      }, 60000);
+
+      $('#borrowForm').on('submit', function(event) {
+        event.preventDefault();
+
+        
+
+        const borrowDate = new Date($('#borrow_date').val());
+        const returnDate = new Date($('#return_date').val());
+
+        if (returnDate <= borrowDate) {
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'วันที่คืนต้องหลังจากวันที่ยืมอย่างน้อย 1 วัน!',
+            confirmButtonText: 'ตกลง'
+          });
+          return;
+        }
+
+        Swal.fire({
+          title: 'กำลังบันทึกข้อมูล...',
+          html: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        setTimeout(() => {
+          Swal.fire({
+            title: 'บันทึกสำเร็จ!',
+            text: 'ข้อมูลการยืมถูกบันทึกเรียบร้อยแล้ว',
+            icon: 'success',
+            confirmButtonText: 'ตกลง'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              this.submit();
+            }
+          });
+        }, 1000);
+      });
+
+      $('#user_id').on('select2:open', function() {
+        let searchField = $('.select2-container--open .select2-search__field');
+        searchField.trigger('focus');
+      });
+
+      $('#book_id').on('select2:open', function() {
+        let searchField = $('.select2-container--open .select2-search__field');
+        searchField.trigger('focus');
+      });
+
+    });
+
+        // SweetAlert จาก URL Query ?alert=...
+        const urlParams = new URLSearchParams(window.location.search);
+    const alertParam = urlParams.get('alert');
+
+    if (alertParam) {
+      let alertConfig = {};
+
+      switch (alertParam) {
+        case 'success':
+          alertConfig = {
+            icon: 'success',
+            title: 'บันทึกสำเร็จ!',
+            text: 'ข้อมูลการยืมถูกบันทึกเรียบร้อยแล้ว'
+          };
+          break;
+        case 'duplicate':
+          alertConfig = {
+            icon: 'warning',
+            title: 'ไม่สามารถยืมได้',
+            text: 'คุณได้ยืมหนังสือเล่มนี้อยู่แล้ว กรุณาคืนก่อน'
+          };
+          break;
+        case 'limit':
+          alertConfig = {
+            icon: 'error',
+            title: 'ไม่สามารถยืมได้',
+            text: 'คุณยืมหนังสือครบ 3 เล่มแล้ว'
+          };
+          break;
+        case 'quantity':
+          alertConfig = {
+            icon: 'error',
+            title: 'ไม่สามารถยืมได้',
+            text: 'หนังสือหมดชั่วคราว กรุณารอการคืน'
+          };
+          break;
+        default:
+          alertConfig = {
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่'
+          };
+      }
+
+      Swal.fire({
+        ...alertConfig,
+        confirmButtonText: 'ตกลง'
+      }).then(() => {
+        // ล้าง query string ออกหลังแสดง alert แล้ว
+        window.history.replaceState({}, document.title, window.location.pathname);
+      });
+    }
+
+    
+  </script>
+
+  
+  
+</body>
+<%- include("../views/_footer1"); -%>

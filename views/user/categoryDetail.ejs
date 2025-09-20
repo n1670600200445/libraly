@@ -1,0 +1,173 @@
+<%- include("../user/_header"); -%>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Category Detail</title>
+
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background-color: #f9f9fb;
+      color: #2c3e50;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 15px;
+    }
+
+    .category-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #b71c1c;
+    }
+
+    h3.section-title {
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+      color: #37474f;
+    }
+
+    .book-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 18px;
+    }
+
+    .book-card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .book-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .book-image {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      border-bottom: 1px solid #eee;
+    }
+
+    .book-info {
+      padding: 10px 15px;
+    }
+
+    .book-info h5 {
+      font-size: 1rem;
+      color: #263238;
+      margin: 0 0 6px;
+    }
+
+    .book-info p {
+      font-size: 0.85rem;
+      margin: 2px 0;
+      color: #616161;
+    }
+
+    .search-box {
+      width: 100%;
+      max-width: 350px;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      transition: border-color 0.2s ease;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #b71c1c;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 20px 10px;
+      }
+
+      .category-title {
+        font-size: 1.4rem;
+      }
+
+      h3.section-title {
+        font-size: 1.2rem;
+      }
+
+      .book-info h5 {
+        font-size: 0.95rem;
+      }
+
+      .book-info p {
+        font-size: 0.8rem;
+      }
+
+      .book-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+      }
+    }
+
+    .book-card a {
+  text-decoration: none !important;
+  color: inherit;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- ช่องค้นหา -->
+    <div style="margin-bottom: 25px;">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="ค้นหาชื่อหนังสือ..."
+        class="search-box"
+      />
+    </div>
+
+    <h3 class="section-title">หนังสือในหมวดหมู่ <%= category.name %></h3>
+
+    <div class="book-grid">
+        <% books.forEach((book) => { %>
+          <a href="/book/detail/<%= book.id %>" class="text-decoration-none text-dark" style="text-decoration: none;">
+            <div class="book-card">
+              <img src="/images/<%= book.image %>" alt="Book Image" class="book-image" />
+              <div class="book-info">
+                <h5><%= book.title %></h5>
+                <p><strong>ผู้แต่ง:</strong> <%= book.author %></p>
+                <p><strong>ปี:</strong> <%= book.year %></p>
+                <p><strong>ISBN:</strong> <%= book.isbn %></p>
+              </div>
+            </div>
+          </a>
+        <% }); %>
+      </div>
+      
+  </div>
+
+  
+
+  <script>
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const query = this.value.toLowerCase();
+      const cards = document.querySelectorAll(".book-card");
+
+      cards.forEach((card) => {
+        const title = card.querySelector("h5").textContent.toLowerCase();
+        card.style.display = title.includes(query) ? "block" : "none";
+      });
+    });
+  </script>
+
+  <%- include("../user/_footer"); -%>

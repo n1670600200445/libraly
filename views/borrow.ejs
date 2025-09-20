@@ -1,0 +1,288 @@
+<%- include("../views/_header1"); -%>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Borrowing</title>
+
+    <!-- DataTable CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .btn-primary, .btn-danger {
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 15px;
+            text-align: center;
+        }
+        table th {
+            background-color: #ea9292;
+            color: white;
+        }
+        table td {
+            background-color: white;
+        }
+        table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .table-danger {
+            background-color: #f8d7da !important;
+        }
+        footer {
+            background-color: #79c0d9;
+            padding: 10px;
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>ข้อมูลการยืมหนังสือ (ยังไม่คืน)</h1>
+    <table id="categoriesTable" class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>ชื่อผู้ยืม</th>
+            <th>ภาพ</th>
+            <th>ชื่อหนังสือ</th>
+            <th>สถานะ</th>
+            <th>วันที่ยืม</th>
+            <th>วันที่คืน</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% borrowed_books.forEach((borrowed_book) => {
+            if (borrowed_book.status !== 'คืนแล้ว') {
+                const now = new Date();
+                const returnDate = new Date(borrowed_book.return_date);
+                const isOverdue = returnDate < now;
+
+                function formatDate(dateString) {
+                    if (!dateString) return '-';
+                    const date = new Date(dateString);
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${year}-${month}-${day}`;
+                }
+        %>
+        <tr class="<%= isOverdue ? 'table-danger' : '' %>">
+            <td><%= borrowed_book.username %> (<%= borrowed_book.phone %>)</td>
+            <td>
+                <% if (borrowed_book.image) { %>
+                    <img src="/images/<%= borrowed_book.image %>" alt="Book Image" width="50" style="cursor:pointer"
+                         data-bs-toggle="modal" data-bs-target="#imageModal"
+                         onclick="showImage('/images/<%= borrowed_book.image %>', '<%= borrowed_book.title %>')">
+                <% } else { %> ไม่มีภาพ <% } %>
+            </td>
+            <td><%= borrowed_book.title %></td>
+            <td>
+                <% if (isOverdue) { %>
+                    <span class="text-danger font-weight-bold">เกินกำหนดคืน</span>
+                <% } else { %>
+                    <%= borrowed_book.status %>
+                <% } %>
+            </td>
+            <td><%= formatDate(borrowed_book.borrow_date) %></td>
+            <td><%= formatDate(borrowed_book.return_date) %></td>
+            <td>
+                <button class="btn btn-success" onclick="confirmReturn(<%= borrowed_book.id %>, '<%= borrowed_book.title %>', '/images/<%= borrowed_book.image %>')">
+                    <i class="fas fa-undo"></i> คืนหนังสือ
+                </button>
+            </td>
+        </tr>
+        <% } }); %>
+        </tbody>
+    </table>
+
+    <h1 class="mt-5">ข้อมูลการยืมหนังสือ (คืนแล้ว)</h1>
+    <table id="returnedBooksTable" class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>ชื่อผู้ยืม</th>
+            <th>ภาพ</th>
+            <th>ชื่อหนังสือ</th>
+            <th>สถานะ</th>
+            <th>วันที่ยืม</th>
+            <th>วันที่คืน</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% borrowed_books.forEach((borrowed_book) => {
+            if (borrowed_book.status === 'คืนแล้ว') {
+                function formatDate(dateString) {
+                    if (!dateString) return '-';
+                    const date = new Date(dateString);
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${year}-${month}-${day}`;
+                }
+        %>
+        <tr>
+            <td><%= borrowed_book.username %> (<%= borrowed_book.phone %>)</td>
+            <td>
+                <% if (borrowed_book.image) { %>
+                    <img src="/images/<%= borrowed_book.image %>" alt="Book Image" width="50" style="cursor:pointer"
+                         data-bs-toggle="modal" data-bs-target="#imageModal"
+                         onclick="showImage('/images/<%= borrowed_book.image %>', '<%= borrowed_book.title %>')">
+                <% } else { %> ไม่มีภาพ <% } %>
+            </td>
+            <td><%= borrowed_book.title %></td>
+            <td><%= borrowed_book.status %></td>
+            <td><%= formatDate(borrowed_book.borrow_date) %></td>
+            <td><%= formatDate(borrowed_book.return_date) %></td>
+        </tr>
+        <% } }); %>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal แสดงภาพหนังสือ -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Book Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4 id="bookTitle"></h4>
+                <img id="modalImage" src="" alt="Book Image" style="width: 100%; height: auto;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS and DataTables -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    function showImage(imageUrl, bookTitle) {
+        document.getElementById('modalImage').src = imageUrl;
+        document.getElementById('bookTitle').innerText = bookTitle;
+    }
+
+    function confirmReturn(borrowedBookId, bookTitle, bookImage) {
+        Swal.fire({
+            title: `คุณแน่ใจหรือไม่?`,
+            html: `
+                <h5>${bookTitle}</h5>
+                <img src="${bookImage}" alt="Book Image" style="width: 100px; height: auto; margin-top: 10px;">
+                <p>คุณต้องการคืนหนังสือเล่มนี้หรือไม่?</p>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'ยืนยันการคืน',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const button = document.querySelector(`button[onclick*="confirmReturn(${borrowedBookId}"]`);
+                button.disabled = true;
+                button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> กำลังคืน...`;
+
+                fetch(`/return/${borrowedBookId}`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        Swal.fire('สำเร็จ!', 'คืนหนังสือเรียบร้อยแล้ว', 'success').then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถคืนหนังสือได้', 'error');
+                        button.disabled = false;
+                        button.innerHTML = `<i class="fas fa-undo"></i> คืนหนังสือ`;
+                    }
+                })
+                .catch(error => {
+                    Swal.fire('เกิดข้อผิดพลาด!', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
+                    button.disabled = false;
+                    button.innerHTML = `<i class="fas fa-undo"></i> คืนหนังสือ`;
+                });
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $('#categoriesTable').DataTable({
+            paging: true,
+            lengthChange: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "- ทั้งหมด -"]],
+            order: [[4, 'desc']],
+            language: {
+                lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
+                zeroRecords: "ไม่พบข้อมูล",
+                info: "แสดงหน้า _PAGE_ จาก _PAGES_",
+                infoEmpty: "ไม่มีข้อมูล",
+                infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
+                search: "ค้นหา:",
+                paginate: {
+                    first: "หน้าแรก",
+                    last: "หน้าสุดท้าย",
+                    next: "ถัดไป",
+                    previous: "ก่อนหน้า"
+                }
+            }
+        });
+
+        $('#returnedBooksTable').DataTable({
+            paging: true,
+            lengthChange: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "- ทั้งหมด -"]],
+            order: [[4, 'desc']],
+            language: {
+                lengthMenu: "แสดง _MENU_ รายการต่อหน้า",
+                zeroRecords: "ไม่พบข้อมูล",
+                info: "แสดงหน้า _PAGE_ จาก _PAGES_",
+                infoEmpty: "ไม่มีข้อมูล",
+                infoFiltered: "(กรองจากทั้งหมด _MAX_ รายการ)",
+                search: "ค้นหา:",
+                paginate: {
+                    first: "หน้าแรก",
+                    last: "หน้าสุดท้าย",
+                    next: "ถัดไป",
+                    previous: "ก่อนหน้า"
+                }
+            }
+        });
+    });
+</script>
+<%- include("../views/_footer1"); -%>

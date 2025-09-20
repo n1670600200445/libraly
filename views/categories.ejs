@@ -1,0 +1,255 @@
+<%- include("../views/_header1"); -%>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Categories</title>
+
+    <!-- DataTable CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Font Awesome (ไอคอน) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .btn-primary, .btn-danger {
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 15px;
+            text-align: center;
+        }
+        table th {
+            background-color: #ea9292;
+            color: white;
+        }
+        table td {
+            background-color: white;
+        }
+        table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        footer {
+            background-color: #79c0d9;
+            padding: 10px;
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .modal-footer {
+            border-top: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>หมวดหมู่หนังสือ</h1>
+
+    <!-- <a href="/addcat" class="btn btn-primary mb-3">เพิ่มหมวดหมู่</a> -->
+    <button id="addcatBtn" class="btn btn-success mb-3"><i class='bx bx-category-alt'></i></i>เพิ่มหมวดหมู่</button>
+
+
+    <table id="categoriesTable" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ลำดับ</th>
+                <th>รหัสหมวด</th>
+                <th>ชื่อหมวดหมู่</th>
+                <th>รายละเอียดเกี่ยวกับหมวดหมู่</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% categories.forEach((category, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= category.code %></td>
+                    <td><%= category.name %></td>
+                    <td><%= category.description %></td>
+                    <td>
+                        <!-- Trigger for modal edit form -->
+                        <a href="javascript:void(0)" class="btn btn-warning btn-sm edit-btn" data-id="<%= category.id %>" data-name="<%= category.name %>" data-description="<%= category.description %>"><i class="fas fa-edit"></i>แก้ไข</a>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="<%= category.id %>"><i class="fas fa-trash-alt"></i>ลบ</button>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal สำหรับการแก้ไขหมวดหมู่ -->
+<div class="modal" id="editModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">แก้ไขหมวดหมู่</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="closeModalButton">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- ที่เก็บฟอร์มแก้ไข -->
+                <div id="editModalContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // เมื่อกดปุ่มกากบาท ให้เปลี่ยนเส้นทางไปที่หน้า categories
+    document.getElementById('closeModalButton').addEventListener('click', function() {
+        window.location.href = '/categories';  // นำทางไปยังหน้าหมวดหมู่
+    });
+</script>
+
+
+
+<!-- Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">ยืนยันการลบ</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="closeModalButtonDeleteClose">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>คุณต้องการลบข้อมูลหมวดหมู่หรือไม่?</p>
+        </div>
+        <div class="modal-footer">
+            <!-- ปรับ id ให้แตกต่างกัน -->
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" id="closeModalButtonDeleteCancel">ยกเลิก</button>
+          <form id="deleteForm" method="post">
+            <button type="submit" class="btn btn-danger">ลบ</button>
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- Modal สำหรับเพิ่มหมวดหมู่ -->
+<div class="modal" id="addcatModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">เพิ่มหมวดหมู่</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="closeModalButtonAddClose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="addcatModalContent">
+                    <!-- ฟอร์มเพิ่มหมวดหมู่จะถูกโหลดที่นี่ -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // เมื่อกดปุ่ม "ยกเลิก" ให้กลับไปที่หน้า categories
+    document.getElementById('closeModalButtonDeleteCancel').addEventListener('click', function() {
+        window.location.href = '/categories';  // นำทางไปยังหน้าหมวดหมู่
+    });
+
+    // เมื่อกดปุ่มกากบาท (close) ก็ให้กลับไปที่หน้า categories
+    document.getElementById('closeModalButtonDeleteClose').addEventListener('click', function() {
+        window.location.href = '/categories';  // นำทางไปยังหน้าหมวดหมู่
+    });
+
+    // เมื่อกดปุ่มกากบาท (close) ก็ให้กลับไปที่หน้า categories
+    document.getElementById('closeModalButtonAddClose').addEventListener('click', function() {
+        window.location.href = '/categories';  // นำทางไปยังหน้าหมวดหมู่
+    });
+
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#categoriesTable').DataTable({
+            "paging": true,         
+            "lengthChange": true,   // ต้องเป็น true เพื่อให้ dropdown ทำงาน
+            "searching": true,      
+            "ordering": true,       
+            "info": true,           
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "- ทั้งหมด -"] ], // ตั้งค่า dropdown ให้เลือกจำนวนแถวที่แสดง
+            "language": {
+                "lengthMenu": "แสดง _MENU_ รายการต่อหน้า",
+                "zeroRecords": "ไม่พบข้อมูล",
+                "info": "แสดงหน้า _PAGE_ จาก _PAGES_",
+                "infoEmpty": "ไม่มีข้อมูล",
+                "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+                "search": "ค้นหา:",
+                "paginate": {
+                    "first": "หน้าแรก",
+                    "last": "หน้าสุดท้าย",
+                    "next": "ถัดไป",
+                    "previous": "ก่อนหน้า"
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+    // ใช้ event delegation กับปุ่ม edit
+    $('#categoriesTable').on('click', '.edit-btn', function() {
+        const categoryId = $(this).data('id');
+        const url = `/categories/edit/${categoryId}`;
+        $.get(url, function(data) {
+            $('#editModalContent').html(data);  // โหลดฟอร์มลงในโมดัล
+            $('#editModal').modal('show');
+        });
+    });
+
+    // ใช้ event delegation กับปุ่ม delete
+    $('#categoriesTable').on('click', '.delete-btn', function() {
+        const categoryId = $(this).data('id');
+        const formAction = `/categories/delete/${categoryId}`;
+        $('#deleteForm').attr('action', formAction);
+        $('#deleteModal').modal('show');
+    });
+});
+$(document).ready(function() {
+    // เมื่อคลิกปุ่ม "เพิ่มบัญชีผู้ใช้ใหม่"
+    $('#addcatBtn').click(function() {
+        $.get('/addcat', function(data) {
+            $('#addcatModalContent').html(data);  // โหลดฟอร์มเข้าโมดัล
+            $('#addcatModal').modal('show');  // แสดงโมดัล
+        });
+    });
+});
+</script>
+
+
+<%- include("../views/_footer1"); -%>

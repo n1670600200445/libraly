@@ -1,0 +1,175 @@
+<%- include("../user/_header"); -%>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book Details</title>
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+<!-- Bootstrap Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Boxicons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+
+  .book-detail-title {
+    color: #d84315;
+    font-weight: bold;
+    font-size: 2 rem;
+    margin: 5px 0;
+    text-align: center;
+  }
+
+  .book-image {
+    width: 100%;
+    max-width: 380px; /* กำหนดขนาดสูงสุดของภาพ */
+    height: auto;
+    aspect-ratio: 2 / 3; /* ให้ภาพคงอัตราส่วน 2:3 */
+    object-fit: cover;
+    border-radius: 8px; /* เพิ่มขอบมนให้กับภาพ */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* เพิ่มเงาให้กับภาพ */
+    margin-bottom: 20px; /* ลดระยะห่างระหว่างภาพและข้อความ */
+    transition: all 0.3s ease;
+    margin: 0 auto; /* ให้อยู่กลาง */
+    display: block; /* ทำให้แสดงเป็นบล็อกเพื่อจัดตำแหน่งกลาง */
+  }
+  /* ป้องกันไม่ให้เกิดการขยับของ layout */
+    body.modal-open .container {
+      position: relative;
+      overflow: hidden;
+  }
+
+  .container {
+  position: relative;
+  z-index: 1;  
+}
+
+  .book-info {
+    font-size: 1.1rem;
+    color: #555;
+    line-height: 1.6;
+    margin-top: 0;
+  }
+
+  .btn {
+    font-size: 1rem;
+    background-color: #d84315;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    transition: background-color 0.3s;
+    display: inline-block;
+    text-decoration: none;
+    margin-top: 20px;
+  }
+
+  .btn:hover {
+    background-color: #c13500;
+  }
+
+  /* เพิ่มความสมดุลให้กับเนื้อหาของแต่ละคอลัมน์ */
+  .row {
+    display: flex;
+    justify-content: left;
+    align-items: left;
+    text-align: left;
+  }
+
+  /* เพิ่มระยะห่างระหว่างภาพและข้อความ */
+.col-12.col-md-6 {
+  padding: 15px;
+  padding-left: 10px; /* เพิ่มระยะห่างด้านซ้ายของข้อความ */
+}
+
+
+  /* เพิ่มการจัดการตำแหน่งให้สมดุลทั้งในมือถือและเดสก์ท็อป */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 15px;
+  }
+
+  @media (max-width: 768px) {
+    .book-image {
+      max-width: 100%; /* ให้ภาพเต็มขนาดหน้าจอบนอุปกรณ์มือถือ */
+      margin-bottom: 15px; /* ลดระยะห่างในมือถือ */
+    }
+
+    .book-info {
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+
+    .book-detail-title {
+      font-size: 1.8rem;
+    }
+  }
+
+  /* ปรับปรุงปุ่มเมื่อได้รับโฟกัสหรือถูกคลิก */
+  .btn:focus, .btn:active {
+    outline: none;
+    background-color: #d84315; /* รักษาสีเดิมเมื่อคลิก */
+    border: none;
+  }
+
+  .btn-action {
+  background: linear-gradient(135deg, #e74c3c, #d35400); /* แดงส้มไล่เฉด */
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  transition: all 0.3s ease-in-out;
+}
+
+.btn-action i {
+  margin-right: 6px;
+}
+
+.btn-action:hover {
+  background: linear-gradient(135deg, #c0392b, #b03a2e);
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+</style>
+
+<body>
+  <div class="container">
+    <h2 class="book-detail-title"><%= book.title %></h2>
+
+    <div class="row">
+      <div class="col-12 col-md-6">
+        <img src="/images/<%= book.image %>" alt="Book Image" class="book-image">
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="book-info">
+          <p><strong>ผู้แต่ง:</strong> <%= book.author %></p>
+          <p><strong>หมวดหมู่:</strong> <%= book.category_name %> (รหัส: <%= book.category_code %>)</p>
+          <p><strong>เรื่องย่อ:</strong> <%= book.story %></p>
+          <!-- <td>
+            <% if (book.quantity > 0) { %>
+              <form method="POST" action="/records/<%= book.id %>">
+                <button class="btn-action" type="submit"><i class="fas fa-book-reader"></i> ยืมหนังสือ</button>
+              </form>
+            <% } else { %>
+              <span class="not-available">Not available</span>
+            <% } %>
+          </td>        -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include("../user/_footer"); -%>  

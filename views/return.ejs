@@ -1,0 +1,126 @@
+<%- include("../views/_header1"); -%>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ประวัติการยืมหนังสือ</title>
+
+    <!-- DataTable CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Font Awesome (ไอคอน) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 15px;
+            text-align: center;
+        }
+        table th {
+            background-color: #ea9292;
+            color: white;
+        }
+        table td {
+            background-color: white;
+        }
+        table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        footer {
+            background-color: #79c0d9;
+            padding: 10px;
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ประวัติการยืมหนังสือ</h1>
+    <table id="borrowHistoryTable" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ชื่อผู้ยืม</th>
+                <th>ชื่อหนังสือ</th>
+                <th>วันที่ยืม</th>
+                <th>วันที่คืน</th>
+                <th>สถานะ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% borrowHistory.forEach(borrow => { 
+                function formatDate(dateString) {
+                    if (!dateString) return '-';
+                    const date = new Date(dateString);
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${year}-${month}-${day}`; // เปลี่ยนเป็น YYYY-MM-DD
+                }
+            %>
+                <tr>
+                    <td><%= borrow.username %> (<%= borrow.phone %>)</td>
+                    <td><%= borrow.title %></td>
+                    <td><%= formatDate(borrow.borrow_date) %></td>
+                    <td><%= formatDate(borrow.return_date) %></td>
+                    <td><%= borrow.status %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // DataTable Initialization
+    $(document).ready(function() {
+        $('#borrowHistoryTable').DataTable({
+            "paging": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "- ทั้งหมด -"] ],
+            "order": [[2, 'desc']],  // เรียงลำดับตามคอลัมน์ที่ 2 (วันที่ยืม) ใหม่ไปเก่า
+            "language": {
+                "lengthMenu": "แสดง _MENU_ รายการต่อหน้า",
+                "zeroRecords": "ไม่พบข้อมูล",
+                "info": "แสดงหน้า _PAGE_ จาก _PAGES_",
+                "infoEmpty": "ไม่มีข้อมูล",
+                "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+                "search": "ค้นหา:",
+                "paginate": {
+                    "first": "หน้าแรก",
+                    "last": "หน้าสุดท้าย",
+                    "next": "ถัดไป",
+                    "previous": "ก่อนหน้า"
+                }
+            }
+        });
+    });
+</script>
+
+<%- include("../views/_footer1"); -%>

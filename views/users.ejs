@@ -1,0 +1,274 @@
+<%- include("../views/_header1"); -%>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users</title>
+
+    <!-- DataTable CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+     <!-- Font Awesome (ไอคอน) -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .btn-success, .btn-warning, .btn-danger {
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 15px;
+            text-align: center;
+        }
+        table th {
+            background-color: #ea9292;
+            color: white;
+        }
+        table td {
+            background-color: white;
+        }
+        table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        footer {
+            background-color: #79c0d9;
+            padding: 10px;
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>จัดการบัญชีผู้ใช้</h1>
+
+    <button id="addUserBtn" class="btn btn-success mb-3"><i class="fas fa-user-plus"></i>เพิ่มบัญชีผู้ใช้ใหม่</button>
+    <table id="usersTable" class="table table-striped" style="width:100%">
+    <!-- <table id="usersTable" class="table table-bordered table-striped"> -->
+        <thead>
+            <tr>
+                <th>ลำดับ</th>
+                <th>ชื่อผู้ใช้</th>
+                <th>ชื่อ - นามสกุล</th>
+                <th>อีเมล</th>
+                <th>เบอร์โทรศัพท์</th>
+                <th>ที่อยู่</th>
+                <th>สถานะ</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% users.forEach((user, index) => { %> 
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= user.username %></td> 
+                    <td><%= user.name %></td> 
+                    <td><%= user.email %></td> 
+                    <td><%= user.phone %></td>
+                    <td><%= user.address %></td>
+                    <td>
+                        <% if (user.role == 1) { %>
+                            <span style="color: red;">Admin</span>
+                        <% } else { %>
+                            <span style="color: green;">User</span>
+                        <% } %>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm edit-btn" data-id="<%= user.id %>"><i class="fas fa-edit"></i>แก้ไข</button>
+                        
+                        <!-- Add the delete button with the necessary data -->
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="<%= user.id %>"> <i class="fas fa-trash-alt"></i>ลบ</button> 
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">ยืนยันการลบบัญชี</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="redirectTousers()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>คุณต้องการลบบัญชีผู้ใช้นี้หรือไม่?</p>
+          <div id="userDetails">
+            <!-- Placeholder for user details -->
+            <p><strong>ชื่อผู้ใช้:</strong> <span id="username"></span></p>
+            <p><strong>ชื่อ - นามสกุล:</strong> <span id="name"></span></p>
+            <p><strong>อีเมล:</strong> <span id="email"></span></p>
+            <p><strong>เบอร์โทรศัพท์:</strong> <span id="phone"></span></p>
+            <p><strong>ที่อยู่:</strong> <span id="address"></span></p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="redirectTousers()">ยกเลิก</button>
+          <form id="deleteForm" method="post" action="">
+            <button type="submit" class="btn btn-danger">ลบ</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>  
+
+<script>
+    function redirectTousers() {
+        window.location.href = '/users';  // Redirect to /book page
+    }
+</script>  
+
+<!-- โมดัลสำหรับการแก้ไขข้อมูลผู้ใช้ -->
+<div class="modal" id="editModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">แก้ไขข้อมูลผู้ใช้</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="redirectTousers()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="editModalContent">
+                    <!-- เนื้อหาฟอร์มจะถูกโหลดที่นี่ -->
+                </div>
+            </div>
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
+            </div> -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal สำหรับเพิ่มบัญชีผู้ใช้ -->
+<div class="modal" id="addUserModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">เพิ่มบัญชีผู้ใช้</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="redirectTousers()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="addUserModalContent">
+                    <!-- ฟอร์มเพิ่มบัญชีผู้ใช้จะถูกโหลดที่นี่ -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#usersTable').DataTable({
+        "paging": true,         
+        "lengthChange": true,   // ต้องเป็น true เพื่อให้ dropdown ทำงาน
+        "searching": true,      
+        "ordering": true,       
+        "info": true,           
+        "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "- ทั้งหมด -"] ], // ตั้งค่า dropdown ให้เลือกจำนวนแถวที่แสดง
+        "language": {
+            "lengthMenu": "แสดง _MENU_ รายการต่อหน้า",
+            "zeroRecords": "ไม่พบข้อมูล",
+            "info": "แสดงหน้า _PAGE_ จาก _PAGES_",
+            "infoEmpty": "ไม่มีข้อมูล",
+            "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+            "search": "ค้นหา:",
+            "paginate": {
+                "first": "หน้าแรก",
+                "last": "หน้าสุดท้าย",
+                "next": "ถัดไป",
+                "previous": "ก่อนหน้า"
+            }
+        }
+    });
+});
+
+</script>
+
+<script>
+  $(document).ready(function() {
+    // ใช้ .on() เพื่อผูกอีเวนต์กับปุ่มแก้ไข
+    $(document).on('click', '.edit-btn', function() {
+        const userId = $(this).data('id');  // ดึง ID ของผู้ใช้จาก data-id
+        const url = `/usersedit/${userId}`;  // URL สำหรับดึงฟอร์มแก้ไขของผู้ใช้
+        
+        // ใช้ AJAX ดึงข้อมูลผู้ใช้และแสดงใน modal แก้ไข
+        $.get(url, function(data) {
+            $('#editModalContent').html(data);  // โหลดฟอร์มเข้าในโมดัล
+            $('#editModal').modal('show');  // แสดงโมดัลแก้ไข
+        });
+    });
+
+    // ใช้ .on() เพื่อผูกอีเวนต์กับปุ่มลบ
+    $(document).on('click', '.delete-btn', function() {
+        const userId = $(this).data('id'); // ดึง ID ของผู้ใช้จาก data-id
+        
+        // กำหนด action ของฟอร์มเพื่อให้ตรงกับ URL สำหรับลบผู้ใช้
+        const formAction = `/deleteusers/${userId}`;
+        $('#deleteForm').attr('action', formAction);
+
+        // ดึงข้อมูลผู้ใช้จากเซิร์ฟเวอร์โดยใช้ AJAX
+        $.ajax({
+            url: `/users/details/${userId}`, // เส้นทางที่ดึงข้อมูลผู้ใช้ตาม ID
+            method: 'GET',
+            success: function(response) {
+                // ใส่ข้อมูลผู้ใช้ลงในป็อปอัพ
+                $('#username').text(response.username);
+                $('#name').text(response.name);
+                $('#email').text(response.email);
+                $('#phone').text(response.phone);
+                $('#address').text(response.address);
+                
+                // แสดงป็อปอัพ
+                $('#deleteModal').modal('show');
+            },
+            error: function(err) {
+                console.error("เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้: ", err);
+            }
+        });
+    });
+});
+
+
+
+$(document).ready(function() {
+    // เมื่อคลิกปุ่ม "เพิ่มบัญชีผู้ใช้ใหม่"
+    $('#addUserBtn').click(function() {
+        $.get('/usersadd', function(data) {
+            $('#addUserModalContent').html(data);  // โหลดฟอร์มเข้าโมดัล
+            $('#addUserModal').modal('show');  // แสดงโมดัล
+        });
+    });
+});
+
+
+</script>
+
+<%- include("../views/_footer1"); -%>

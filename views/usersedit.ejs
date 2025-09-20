@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-control, select {
+            margin-bottom: 20px;
+        }
+        .btn-primary, .btn-secondary {
+            width: 100%;
+            padding: 12px;
+        }
+        .btn-primary {
+    background-color: #f57c00; /* สี #f57c00 สำหรับปุ่มบันทึก */
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #e65c00; /* สีเข้มขึ้นเมื่อ hover */
+}
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .checkbox-container {
+            margin-top: 10px;
+        }
+        .checkbox-container input {
+            margin-right: 10px;
+        }
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn-container .btn {
+            width: 48%; /* Ensures both buttons take almost equal space */
+        }
+        .form-control:focus {
+            box-shadow: 0 0 10px #bf360c;
+            border-color: #bf360c;
+        }
+    </style>
+</head>
+<body>
+<div class="container form-container">
+    <h1>แก้ไขข้อมูลบัญชี</h1>
+    <form action="/usersedit/<%= user.id %>" method="POST">
+
+        <div class="form-group">
+            <label for="username">ชื่อผู้ใช้:</label>
+            <input type="text" id="username" name="username" class="form-control" value="<%= user.username %>" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">รหัสผ่าน:</label>
+            <input type="password" id="password" name="password" class="form-control" value="<%= user.password %>" required>
+        </div>
+
+        <div class="form-group">
+            <label for="name">ชื่อ - นามสกุล:</label>
+            <input type="text" id="name" name="name" class="form-control" value="<%= user.name %>" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">อีเมล:</label>
+            <input type="email" id="email" name="email" class="form-control" value="<%= user.email %>" required>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">เบอร์โทรศัพท์:</label>
+            <input type="text" id="phone" name="phone" class="form-control" 
+                   value="<%= user.phone %>" required 
+                   maxlength="10" 
+                   pattern="^\d{10}$" 
+                   title="กรุณากรอกหมายเลขโทรศัพท์ 10 หลัก" />
+        </div>
+        
+
+        <div class="form-group">
+            <label for="address">ที่อยู่:</label>
+            <input type="text" id="address" name="address" class="form-control" value="<%= user.address %>" required>
+        </div>
+
+        <div class="form-group">
+            <label for="role">สถานะ:</label>
+            <select id="role" name="role" class="form-control">
+                <option value="0" <%= user.role === 0 ? 'selected' : '' %>>User</option>
+                <option value="1" <%= user.role === 1 ? 'selected' : '' %>>Admin</option>
+            </select>
+        </div>
+
+        <!-- <div class="form-group">
+            <label>สิทธิ์ในการเข้าถึง:</label><br>
+            <div class="checkbox-container">
+                <input type="checkbox" name="can_add_book" value="2" <%= user.can_add_book ? 'checked' : '' %>> เพิ่มหนังสือ
+                <input type="checkbox" name="can_edit_book" value="2" <%= user.can_edit_book ? 'checked' : '' %>> แก้ไขข้อมูลหนังสือ
+                <input type="checkbox" name="can_delete_book" value="2" <%= user.can_delete_book ? 'checked' : '' %>> ลบข้อมูลหนังสือ
+                <input type="checkbox" name="can_manage_users" value="2" <%= user.can_manage_users ? 'checked' : '' %>> จัดการบัญชีผู้ใช้
+            </div>
+        </div>  -->
+
+        <div class="btn-container">
+            <a href="/users" class="btn btn-secondary">ย้อนกลับ</a>
+            <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+        </div>
+    </form>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+<%- include("../user/_header"); -%>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ประวัติการยืมหนังสือ</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+   <!-- DataTable CSS -->
+   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+
+  <style>
+    body {
+      background-color: #f0f2f5; /* พื้นหลังนวลๆ */
+    }
+    h1 {
+      margin-top: 20px;
+      margin-bottom: 30px;
+      font-weight: bold;
+      text-align: center;
+      color: #bf360c; /* สีส้มเข้ม */
+    }
+    table {
+      background-color: #ffffff;
+    }
+    thead {
+      background-color: #ff7f00; /* สีส้มเข้ม */
+      color: white;
+    }
+    td, th {
+      vertical-align: middle !important;
+      text-align: center;
+    }
+     
+    img {
+      border-radius: 8px;
+      transition: transform 0.2s;
+    }
+    img:hover {
+      transform: scale(1.2);
+    }
+    .badge-status {
+      background-color: #ffa726; /* ส้มอ่อน */
+      color: #fff;
+      font-size: 0.9rem;
+      padding: 0.5em 0.8em;
+      border-radius: 0.5rem;
+    }
+    .table-responsive {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(255, 127, 0, 0.2);
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container my-5">
+  <h1><i class='bx bxs-book-open'></i>ประวัติการยืมหนังสือ</h1>
+
+  <!-- ตารางที่ยังไม่ได้คืน -->
+  <h3>หนังสือที่ยังไม่ได้คืน</h3>
+  <div class="table-responsive">
+    <table id="notReturnedTable" class="table table-bordered table-hover align-middle">
+      <thead>
+        <tr>
+          <th>ชื่อผู้ยืม</th>
+          <th>ภาพ</th>
+          <th>ชื่อหนังสือ</th>
+          <th>สถานะ</th>
+          <th>วันที่ยืม</th>
+          <th>วันที่คืน</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% notReturnedBooks.forEach((borrowed_book, index) => { 
+          function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${year}-${month}-${day}`;
+          }
+      
+          const today = new Date();
+          const returnDate = new Date(borrowed_book.return_date);
+          const isOverdue = returnDate < today;
+        %>
+        <tr class="<%= isOverdue ? 'table-danger' : '' %>">
+          <td><%= borrowed_book.username %> (<%= borrowed_book.phone %>)</td>
+          <td>
+            <% if (borrowed_book.image) { %>
+              <img src="/images/<%= borrowed_book.image %>" alt="Book Image" width="60" height="80" style="cursor:pointer"
+                   data-bs-toggle="modal" data-bs-target="#imageModal" 
+                   onclick="showImage('/images/<%= borrowed_book.image %>', '<%= borrowed_book.title %>')">
+            <% } else { %>
+              ไม่มีภาพ
+            <% } %>                        
+          </td>
+          <td><%= borrowed_book.title %></td>
+          <td>
+            <span class="badge-status">
+              <%= borrowed_book.status %>
+              <% if (isOverdue) { %>
+                <span class="text-danger fw-bold ms-2"> เกินกำหนด</span>
+              <% } %>
+            </span>
+          </td>
+          <td><%= formatDate(borrowed_book.borrow_date) %></td>
+          <td><%= formatDate(borrowed_book.return_date) %></td>
+        </tr>
+        <% }) %>
+      </tbody>      
+    </table>
+  </div>
+
+  <br>
+  <br>
+  <br>
+
+  <!-- ตารางที่คืนแล้ว -->
+  <h3>หนังสือที่คืนแล้ว</h3>
+  <div class="table-responsive">
+    <table id="returnedTable" class="table table-bordered table-hover align-middle">
+      <thead>
+        <tr>
+          <th>ชื่อผู้ยืม</th>
+          <th>ภาพ</th>
+          <th>ชื่อหนังสือ</th>
+          <th>สถานะ</th>
+          <th>วันที่ยืม</th>
+          <th>วันที่คืน</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% returnedBooks.forEach((borrowed_book, index) => { 
+          function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${year}-${month}-${day}`;
+          }
+        %>
+        <tr>
+          <td><%= borrowed_book.username %> (<%= borrowed_book.phone %>)</td>
+          <td>
+            <% if (borrowed_book.image) { %>
+              <img src="/images/<%= borrowed_book.image %>" alt="Book Image" width="60" height="80" style="cursor:pointer"
+                   data-bs-toggle="modal" data-bs-target="#imageModal" 
+                   onclick="showImage('/images/<%= borrowed_book.image %>', '<%= borrowed_book.title %>')">
+            <% } else { %>
+              ไม่มีภาพ
+            <% } %>                        
+          </td>
+          <td><%= borrowed_book.title %></td>
+          <td><span class="badge-status"><%= borrowed_book.status %></span></td>
+          <td><%= formatDate(borrowed_book.borrow_date) %></td>
+          <td><%= formatDate(borrowed_book.return_date) %></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Bootstrap Modal for showing Image -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <img id="modalImage" src="" class="img-fluid rounded" alt="Book">
+        <h5 id="modalTitle" class="mt-3 text-orange"></h5>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showImage(imageUrl, title) {
+    document.getElementById('modalImage').src = imageUrl;
+    document.getElementById('modalTitle').textContent = title;
+  }
+</script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+      // Apply DataTable to both tables
+      $('#notReturnedTable').DataTable({
+          "paging": true,         
+          "lengthChange": true,
+          "searching": true,      
+          "ordering": true,       
+          "info": true,           
+          "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "- ทั้งหมด -"] ], 
+          "language": {
+              "lengthMenu": "แสดง _MENU_ รายการต่อหน้า",
+              "zeroRecords": "ไม่พบข้อมูล",
+              "info": "แสดงหน้า _PAGE_ จาก _PAGES_",
+              "infoEmpty": "ไม่มีข้อมูล",
+              "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+              "search": "ค้นหา:",
+              "paginate": {
+                  "first": "หน้าแรก",
+                  "last": "หน้าสุดท้าย",
+                  "next": "ถัดไป",
+                  "previous": "ก่อนหน้า"
+              }
+          }
+      });
+
+      $('#returnedTable').DataTable({
+          "paging": true,
+          "lengthChange": true,
+          "searching": true,
+          "ordering": true,
+          "info": true,
+          "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "- ทั้งหมด -"] ],
+          "language": {
+              "lengthMenu": "แสดง _MENU_ รายการต่อหน้า",
+              "zeroRecords": "ไม่พบข้อมูล",
+              "info": "แสดงหน้า _PAGE_ จาก _PAGES_",
+              "infoEmpty": "ไม่มีข้อมูล",
+              "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+              "search": "ค้นหา:",
+              "paginate": {
+                  "first": "หน้าแรก",
+                  "last": "หน้าสุดท้าย",
+                  "next": "ถัดไป",
+                  "previous": "ก่อนหน้า"
+              }
+          }
+      });
+  });
+</script>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<%- include("../user/_footer"); -%>

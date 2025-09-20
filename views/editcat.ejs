@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Categories</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .btn-primary1, .btn-secondary {
+            width: 100%;
+            padding: 12px;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+         /* อัปเดต background-color ของปุ่มบันทึกการแก้ไข */
+         .btn-primary1 {
+            background-color: #f57c00; /* สีส้ม */
+            color: white;
+            border: none;
+        }
+        .btn-primary1:hover {
+            background-color: #e65100; /* สีส้มเข้มเมื่อ hover */
+        }
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn-container .btn {
+            width: 48%; /* Ensures both buttons take almost equal space */
+        }
+        .form-control:focus {
+            box-shadow: 0 0 10px #bf360c;
+            border-color: #bf360c;
+        }
+    </style>
+</head>
+<body>
+<div class="container form-container">
+    
+    <h1>แก้ไขหมวดหมู่</h1>
+
+    <form action="/categories/update/<%= categories.id %>" method="POST">
+        <div class="mb-3">
+            <label for="code" class="form-label">ชื่อหมวดหมู่</label>
+            <input type="text" id="code" name="code" class="form-control" value="<%= categories.code %>" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">ชื่อหมวดหมู่</label>
+            <input type="text" id="name" name="name" class="form-control" value="<%= categories.name %>" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">รายละเอียดเกี่ยวกับหมวดหมู่</label>
+            <input type="text" id="description" name="description" class="form-control" value="<%= categories.description %>" required>
+        </div>
+
+        <div class="btn-container">
+            <a href="/categories" class="btn btn-secondary">ยกเลิก</a>
+            <button type="submit" class="btn btn-primary1">บันทึกการแก้ไข</button>
+        </div>
+    </form>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

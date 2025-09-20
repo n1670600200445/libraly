@@ -1,0 +1,289 @@
+<%- include("../views/_header1"); -%>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Book</title>
+
+    <!-- DataTable CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Font Awesome (ไอคอน) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .nav-item {
+            margin-bottom: 20px;
+        }
+        .btn {
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        table th, table td {
+            padding: 15px;
+            text-align: center;
+        }
+        table th {
+            background-color: #ea9292;
+            color: white;
+        }
+        table td {
+            background-color: white;
+        }
+        table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        footer {
+            background-color: #ea9292;
+            padding: 10px;
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+        }
+
+        .btn-custom {
+            background-color: #e7cd9e;
+            color: white; 
+            border: none; 
+        }
+
+        .btn-custom:hover {
+            background-color: #ede9e3; 
+            color: white; 
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .modal-footer {
+            border-top: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>หนังสือทั้งหมด</h1>
+
+    <button id="addbookBtn" class="btn btn-success mb-3"><i class='bx bxs-bookmark-alt-plus'></i></i>เพิ่มหนังสือ</button>
+
+    <table id="bookTable" class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>ลำดับ</th>
+                <th>รหัสหมวด</th>
+                <th>ภาพ</th>
+                <th>ชื่อหนังสือ</th>
+                <th>ผู้แต่ง</th>
+                <th>ชื่อหมวดหมู่</th>
+                <th>ปีที่พิมพ์</th>
+                <th>รหัส ISBN ของหนังสือ</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% book.forEach((book, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= book.category_code %></td>
+                    <td>
+                        <% if (book.image) { %>
+                            <img src="/images/<%= book.image %>" alt="Book Image" width="50" style="cursor:pointer"
+                                data-bs-toggle="modal" data-bs-target="#imageModal" 
+                                onclick="showImage('/images/<%= book.image %>')">
+                        <% } else { %>
+                            ไม่มีภาพ
+                        <% } %>                        
+                    </td>
+                    <td><%= book.title %> (<%= book.quantity %>)</td>
+                    <td><%= book.author %></td>
+                    <td><%= book.category_name %></td>
+                    <td><%= book.year %></td>
+                    <td><%= book.isbn %></td>
+                    <td>
+                        <button class="btn btn-warning btn-sm edit-btn" data-id="<%= book.id %>"><i class="fas fa-edit"></i> แก้ไข</button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="<%= book.id %>"><i class="fas fa-trash-alt"></i> ลบ</button>                        
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+    
+</div>
+
+<!-- Modal สำหรับแสดงภาพ -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Book Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4 id="bookTitle"></h4> <!-- แสดงชื่อหนังสือ -->
+                <img id="modalImage" src="" alt="Book Image" style="width: 100%; height: auto;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Confirmation Modal -->
+<div class="modal" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">ยืนยันการลบ</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="redirectToBooks()">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>คุณต้องการลบข้อมูลหนังสือหรือไม่?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="redirectToBooks()">ยกเลิก</button>
+          <form id="deleteForm" method="post">
+            <button type="submit" class="btn btn-danger">ลบ</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal" id="editModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">แก้ไขข้อมูลหนังสือ</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="redirectToBooks()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editModalContent">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal สำหรับเพิ่มหนังสือ -->
+<div class="modal" id="addbookModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">เพิ่มหนังสือ</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="redirectToBooks()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="addbookModalContent">
+                    <!-- ฟอร์มเพิ่มหนังสือจะถูกโหลดที่นี่ -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ฟังก์ชันในการแสดงภาพใน Modal
+  function showImage(imageUrl, bookTitle) {
+      document.getElementById('modalImage').src = imageUrl;
+      document.getElementById('bookTitle').innerText = bookTitle;  // แสดงชื่อหนังสือใน Modal
+  }
+    $(document).ready(function() {
+        $('#bookTable').DataTable({
+            "paging": true,         
+            "lengthChange": true,   // ต้องเป็น true เพื่อให้ dropdown ทำงาน
+            "searching": true,      
+            "ordering": true,       
+            "info": true,           
+            "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "- ทั้งหมด -"] ], // ตั้งค่า dropdown ให้เลือกจำนวนแถวที่แสดง
+            "language": {
+                "lengthMenu": "แสดง _MENU_ รายการต่อหน้า",
+                "zeroRecords": "ไม่พบข้อมูล",
+                "info": "แสดงหน้า _PAGE_ จาก _PAGES_",
+                "infoEmpty": "ไม่มีข้อมูล",
+                "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+                "search": "ค้นหา:",
+                "paginate": {
+                    "first": "หน้าแรก",
+                    "last": "หน้าสุดท้าย",
+                    "next": "ถัดไป",
+                    "previous": "ก่อนหน้า"
+                }
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $('#bookTable').DataTable();  // Initializing the DataTable
+
+        // การจัดการการคลิกปุ่มลบ โดยใช้ Event Delegation
+        $('#bookTable').on('click', '.delete-btn', function() {
+            const id = $(this).data('id');
+            const formAction = `/book/delete/${id}`;
+            $('#deleteForm').attr('action', formAction);
+            $('#deleteModal').modal('show');
+        });
+
+        // เมื่อคลิกปุ่มแก้ไข โดยใช้ Event Delegation
+        $('#bookTable').on('click', '.edit-btn', function() {
+            const id = $(this).data('id');
+            const url = `/book/edit/${id}`;
+            // โหลดข้อมูลฟอร์มแก้ไขไปยังโมดัล
+            $.get(url, function(data) {
+                $('#editModalContent').html(data);  // โหลดฟอร์มแก้ไข
+                $('#editModal').modal('show');  // เปิดโมดัล
+            });
+        });
+
+        // เมื่อคลิกปุ่ม "เพิ่ม"
+        $('#addbookBtn').click(function() {
+            $.get('/addbook', function(data) {
+                $('#addbookModalContent').html(data);  // โหลดฟอร์มเข้าโมดัล
+                $('#addbookModal').modal('show');  // แสดงโมดัล
+            });
+        });
+    });
+
+    // ฟังก์ชันสำหรับการรีไดเรกไปที่หน้า books
+    function redirectToBooks() {
+        window.location.href = '/book';  // Redirect to /book page
+    }
+</script>
+
+<script>
+    function showImage(src) {
+        document.getElementById('modalImage').src = src;
+    }
+</script>
+
+
+<%- include("../views/_footer1"); -%>

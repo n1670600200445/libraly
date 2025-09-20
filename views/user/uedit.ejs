@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แก้ไขบัญชี</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff9a9e 10%, #fad0c4 100%);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            padding: 30px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #e57373;
+            font-weight: bold;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            padding-left: 40px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #e57373;
+            box-shadow: 0 0 8px rgba(229, 115, 115, 0.5);
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #999;
+        }
+
+        button {
+            background-color: #e57373;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #d32f2f;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #e57373;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>แก้ไขบัญชี</h1>
+        <form action="/user/uedit/<%= user.id %>" method="POST">
+            <div class="form-group">
+                <i class='bx bxs-user'></i>
+                <input type="text" class="form-control" id="username" name="username" value="<%= user.username %>" required placeholder="ชื่อผู้ใช้">
+            </div>
+            <div class="form-group">
+                <i class='bx bx-user'></i>
+                <input type="text" class="form-control" id="name" name="name" value="<%= user.name %>" required placeholder="ชื่อ - นามสกุล">
+            </div>
+            <div class="form-group">
+                <i class='bx bxs-envelope'></i>
+                <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" required placeholder="อีเมล">
+            </div>
+            <div class="form-group">
+                <i class='bx bxs-phone'></i>
+                <input type="text" class="form-control" id="phone" name="phone" value="<%= user.phone %>" required placeholder="เบอร์โทรศัพท์">
+            </div>
+            <div class="form-group">
+                <i class='bx bxs-home'></i>
+                <input type="text" class="form-control" id="address" name="address" value="<%= user.address %>" required placeholder="ที่อยู่">
+            </div>
+
+            <button type="submit">บันทึกการแก้ไข</button>
+            <a href="/user/account1/<%= user.id %>" class="back-link">ย้อนกลับ</a>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
